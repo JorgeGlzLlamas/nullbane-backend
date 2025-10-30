@@ -6,3 +6,4 @@ psycopg[binary]
 SQLModel
 passlib[bcrypt]
 python-jose[cryptography]
+alembic
