@@ -12,11 +12,14 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     # Configuración de Base de Datos
-    DB_USER: str
-    DB_PASSWORD: str
-    DB_HOST: str
-    DB_PORT: int
-    DB_NAME: str
+
+    DATABASE_URL: PostgresDsn | str | None = None
+
+    DB_HOST: str | None = None
+    DB_NAME: str | None = None
+    DB_PORT: str | None = None
+    DB_USER: str | None = None
+    DB_PASSWORD: str | None = None
 
     @computed_field
     @property
