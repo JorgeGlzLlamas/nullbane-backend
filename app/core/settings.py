@@ -26,7 +26,25 @@ class Settings(BaseSettings):
         """
 
         if isinstance(self.DATABASE_URL, (str, PostgresDsn)):
+            if isinstance(self.DATABASE_URL, str):
+                if self.DATABASE_URL.startswith("postgresql://"):
+                    self.DATABASE_URL = self.DATABASE_URL.replace(
+                        "postgresql://", "postgresql+psycopg://", 1
+                    )
+            
+            elif isinstance(self.DATABASE_URL, PostgresDsn):
+                 if self.DATABASE_URL.scheme == "postgresql":
+                    self.DATABASE_URL = PostgresDsn.build(
+                        scheme="postgresql+psycopg",
+                        username=self.DATABASE_URL.username,
+                        password=self.DATABASE_URL.password,
+                        host=self.DATABASE_URL.host,
+                        port=self.DATABASE_URL.port,
+                        path=self.DATABASE_URL.path,
+                    )
+                    
             return self
+
         
         if all([self.DB_HOST, self.DB_NAME, self.DB_PORT, self.DB_USER, self.DB_PASSWORD is not None]):
             self.DATABASE_URL = PostgresDsn.build(
