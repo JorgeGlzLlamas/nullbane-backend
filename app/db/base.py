@@ -1,38 +1,40 @@
+# app/models/base.py
 import datetime
 from sqlmodel import SQLModel, Field
 from sqlalchemy import Column, DateTime
+from sqlalchemy.orm import declarative_mixin, declared_attr
 
-
-# Función helper para obtener la hora UTC
 def get_utc_now() -> datetime.datetime:
-    """Devuelve la fecha y hora actual en UTC con zona horaria."""
     return datetime.datetime.now(datetime.timezone.utc)
 
 
-# Modelo base
-class BaseModel(SQLModel):
-    """
-    Modelo base que incluye campos comunes para todas las tablas.
-    No se convierte en tabla, sirve como "mixin" para otros modelos.
-    """
+@declarative_mixin
+class TimestampMixin:
+    """Mixin declarativo de SQLAlchemy que crea una Column por cada clase."""
 
-    id: int | None = Field(default=None, primary_key=True, index=True)
-
-    created_at: datetime.datetime = Field(
-        default_factory=get_utc_now,
-        sa_column=Column(
+    @declared_attr
+    def created_at(cls):
+        # Devuelve una NUEVA instancia Column para cada clase que herede.
+        return Column(
             DateTime(timezone=True),
             nullable=False,
             default=get_utc_now,
         )
-    )
 
-    updated_at: datetime.datetime = Field(
-        default_factory=get_utc_now,
-        sa_column=Column(
+    @declared_attr
+    def updated_at(cls):
+        return Column(
             DateTime(timezone=True),
             nullable=False,
             default=get_utc_now,
             onupdate=get_utc_now,
         )
-    )
+
+
+class BaseModel(TimestampMixin, SQLModel):
+    """
+    BaseModel que combina el mixin declarativo con SQLModel.
+    NOTA: el orden de herencia es importante (mixin antes de SQLModel).
+    """
+
+    id: int | None = Field(default=None, primary_key=True, index=True)

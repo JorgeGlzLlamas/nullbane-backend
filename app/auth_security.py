@@ -4,8 +4,8 @@ from jose import JWTError, jwt
 import bcrypt
 from datetime import datetime, timedelta, timezone
 from typing import Optional
-from sqlmodel import Session
-
+from sqlmodel import Session, select
+from sqlalchemy.orm import selectinload
 from app.core.settings import settings
 from app.db.session import get_db
 
@@ -72,74 +72,62 @@ def get_current_user(
     db: Session = Depends(get_db), 
     token: str = Depends(oauth2_scheme)
 ) -> User:
-    """
-    Dependencia de FastAPI para obtener el usuario actual a partir de un token JWT.
-    Esto se usará para proteger endpoints.
-    """
+
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="No se pudieron validar las credenciales",
+        detail="No se pudieron validar las credenciales (Access Token)",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
+
     try:
         payload = jwt.decode(
             token, 
             settings.JWT_SECRET_KEY, 
             algorithms=[settings.JWT_ALGORITHM]
         )
-        username: str = payload.get("sub")
-        if username is None:
+        email: str = payload.get("sub") 
+        if email is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-
-    user = user_repository.get_user_by_username(db, username=username)
-    if user is None:
-        raise credentials_exception
-
+    
+    statement = select(User).where(User.email == email).options(
+        selectinload(User.settings) 
+    )
+    user = db.exec(statement).first()
+    
+    if user is None: raise credentials_exception
     if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail="Usuario inactivo"
-        )
-        
+        raise HTTPException(status_code=400, detail="Usuario inactivo")
     return user
 
 
-def get_current_user_from_refresh_token(
-    request: Request,
-    db: Session = Depends(get_db)
+def get_user_from_refresh_token_string(
+    db: Session, 
+    token_string: str
 ) -> User:
-    """
-    Guardia que valida el Refresh Token (leído desde la cookie HttpOnly).
-    Se usa SÓLO para el endpoint /auth/refresh.
-    """
-    token = request.cookies.get("refresh_token")
-    
+    """Valida un refresh token (string) y devuelve el usuario."""
+
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="No se pudo validar el refresh token (Cookie)",
+        detail="No se pudo validar el refresh token",
     )
-    
-    if token is None:
-        raise credentials_exception
+
     try:
         payload = jwt.decode(
-            token, 
+            token_string, 
             settings.JWT_REFRESH_SECRET_KEY, 
             algorithms=[settings.JWT_ALGORITHM]
         )
-        username: str = payload.get("sub")
-        if username is None:
+        email: str = payload.get("sub")
+        if email is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-
-    user = user_repository.get_user_by_username(db, username=username)
-    if user is None:
-        raise credentials_exception
+    
+    user = user_repository.get_user_by_email(db, email=email)
+    
+    if user is None: raise credentials_exception
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Usuario inactivo")
-        
     return user

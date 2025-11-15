@@ -1,13 +1,26 @@
-from sqlmodel import Field
+from sqlmodel import Field, Relationship, SQLModel
 from app.db.base import BaseModel
+from typing import Optional, TYPE_CHECKING
+from datetime import datetime
+from sqlalchemy import Column, DateTime, func
 
+# Para evitar importación circular
+if TYPE_CHECKING:
+    from app.modules.settings.model import Settings
 
 class User(BaseModel, table=True):
-    """Modelo de usuario"""
+    __tablename__ = "user"
 
     email: str = Field(unique=True, index=True, nullable=False)
     username: str = Field(unique=True, index=True, nullable=False)
     hashed_password: str = Field(nullable=False)
-    
+
+    first_name: str = Field(nullable=False)
+    last_name: str | None = Field(default=None)
+    phone_number: str | None = Field(default=None, unique=True, index=True)
+    avatar_url: str | None = Field(default=None)
+
     is_active: bool = Field(default=True)
     is_superuser: bool = Field(default=False)
+    
+    settings: Optional["Settings"] = Relationship(back_populates="user")
