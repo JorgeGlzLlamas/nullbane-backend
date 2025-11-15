@@ -6,6 +6,7 @@ python-multipart
 
 sqlmodel
 psycopg[binary]
+alembic
 
 bcrypt
 python-jose[cryptography]
