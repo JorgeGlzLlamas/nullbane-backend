@@ -1,5 +1,5 @@
-from sqlmodel import SQLModel, Field
-from app.db.base import BaseModel
+from sqlmodel import SQLModel
+from datetime import datetime
 
 
 class UserCreate(SQLModel):
@@ -13,7 +13,7 @@ class UserCreate(SQLModel):
     password: str
 
 
-class UserRead(BaseModel):
+class UserRead(SQLModel):
     """
     Schema para leer datos de un usuario.
     Incluye todos los campos que se pueden devolver en respuestas.
@@ -24,8 +24,9 @@ class UserRead(BaseModel):
     username: str
     is_active: bool
     is_superuser: bool
-    created_at: str
-    updated_at: str
+
+    created_at: datetime
+    updated_at: datetime
 
 
 class UserUpdate(SQLModel):

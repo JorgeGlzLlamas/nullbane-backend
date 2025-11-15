@@ -1,9 +1,13 @@
 fastapi
 uvicorn[standard]
 pydantic-settings
-SQLAlchemy
+python-multipart
+
+sqlmodel
 psycopg[binary]
-SQLModel
-passlib[bcrypt]
+
+bcrypt
 python-jose[cryptography]
-alembic
+
+pytest
+httpx
