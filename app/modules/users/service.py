@@ -11,8 +11,9 @@ import os
 from uuid import uuid4
 
 
-AVATAR_UPLOAD_DIR = "/data/avatars"
-os.makedirs(AVATAR_UPLOAD_DIR, exist_ok=True)
+AVATAR_DISK_DIR = "/data/avatars"
+AVATAR_URL_DIR = "/static/avatars"
+os.makedirs(AVATAR_DISK_DIR, exist_ok=True)
 
 # Límite de 2MB para el avatar
 MAX_AVATAR_SIZE_MB = 2
@@ -130,14 +131,22 @@ class UserService:
 
         file_extension = ".jpg"
         file_name = f"avatar_user_{user.id}_{uuid4()}{file_extension}"
-        file_path_on_disk = os.path.join(AVATAR_UPLOAD_DIR, file_name)
-        file_url_path = f"/{AVATAR_UPLOAD_DIR}/{file_name}".replace("\\", "/")
+
+        
+        # Guardar archivo en el disco
+        file_path_on_disk = os.path.join(AVATAR_DISK_DIR, file_name)
+        # Guardar en la BD la ruta publica
+        file_url_path = f"{AVATAR_URL_DIR}/{file_name}"
 
         if user.avatar_url:
-            old_path = user.avatar_url.lstrip("/")
-            if os.path.exists(old_path):
-                os.remove(old_path)
-
+            try:
+                old_filename = user.avatar_url.split('/')[-1]
+                old_path_on_disk = os.path.join(AVATAR_DISK_DIR, old_filename)
+                if os.path.exists(old_path_on_disk):
+                    os.remove(old_path_on_disk)
+            except Exception as e:
+                print(f"Error al borrar avatar antiguo: {e}")
+        
         try:
             with open(file_path_on_disk, "wb") as buffer:
                 shutil.copyfileobj(file.file, buffer)

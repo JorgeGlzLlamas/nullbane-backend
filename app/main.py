@@ -6,8 +6,9 @@ import os
 
 app = FastAPI(title="Nullbane Backend")
 
-os.makedirs("static", exist_ok=True)
-app.mount("/static/avatars", StaticFiles(directory="/data/avatars"), name="avatars")
+AVATAR_VOLUME_PATH = "/data/avatars"
+os.makedirs(AVATAR_VOLUME_PATH, exist_ok=True)
+app.mount("/static/avatars", StaticFiles(directory=AVATAR_VOLUME_PATH), name="avatars")
 
 app.include_router(api_router_v1, prefix="/api/v1")
 
