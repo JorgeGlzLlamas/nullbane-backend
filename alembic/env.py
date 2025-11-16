@@ -8,6 +8,8 @@ from alembic import context
 from app.core.settings import settings
 from app.modules.users.model import User
 from app.modules.settings.model import Settings
+from app.modules.posts.model import Post
+from app.modules.comments.model import Comment
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

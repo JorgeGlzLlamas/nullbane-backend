@@ -21,3 +21,10 @@ class AccessTokenOnly(SQLModel):
 
 class RefreshRequest(SQLModel):
     refresh_token: str
+
+
+class PromoteRequest(SQLModel):
+    """
+    Schema de entrada para la petición de promoción a admin.
+    """
+    secret_key: str

@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     JWT_REFRESH_SECRET_KEY: str
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 10080
 
+    # Cofigurar clave para promoción a admin
+    ADMIN_PROMOTION_KEY: str
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

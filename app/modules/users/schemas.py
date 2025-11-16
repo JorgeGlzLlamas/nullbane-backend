@@ -1,6 +1,6 @@
 from sqlmodel import SQLModel, Field
 from datetime import datetime
-from pydantic import field_validator, ValidationInfo, EmailStr
+from pydantic import field_validator, ValidationInfo, EmailStr, computed_field
 
 class UserCreate(SQLModel):
     """
@@ -40,6 +40,7 @@ class UserRead(SQLModel):
     phone_number: str | None
     avatar_url: str | None
     is_active: bool
+    is_superuser: bool
     created_at: datetime
     updated_at: datetime
 
@@ -68,3 +69,21 @@ class UserChangePassword(SQLModel):
         if 'new_password' in info.data and v != info.data['new_password']:
             raise ValueError('Las nuevas contraseñas no coinciden')
         return v
+
+class AuthorRead(SQLModel):
+    """
+    Schema simplificado para mostrar el autor (usado en Post/Comment).
+    Incluye el full_name concatenado.
+    """
+    id: int
+    avatar_url: str | None
+    first_name: str
+    last_name: str | None
+
+    @computed_field
+    @property
+    def full_name(self) -> str:
+        """Concatena el nombre y el apellido."""
+        if self.last_name:
+            return f"{self.first_name} {self.last_name}"
+        return self.first_name

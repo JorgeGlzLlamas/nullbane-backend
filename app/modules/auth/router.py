@@ -3,8 +3,11 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session
 from app.db.session import get_db
 from app import auth_security
+from app.core.settings import settings
+from app.modules.users.model import User
+from app.modules.users.schemas import UserRead
 from app.modules.users import repository as user_repository
-from app.modules.auth.schema import Token, AccessTokenOnly, RefreshRequest
+from app.modules.auth.schema import Token, AccessTokenOnly, RefreshRequest, PromoteRequest
 
 router = APIRouter()
 
@@ -79,3 +82,28 @@ def refresh_access_token(
         "access_token": new_access_token,
         "token_type": "bearer"
     }
+
+@router.post(
+    "/promote-me",
+    response_model=UserRead,
+    summary="[DEV ONLY] Promover al usuario autenticado a Superusuario"
+)
+def promote_me_to_admin(
+    promo_data: PromoteRequest, # El body que contiene el secreto
+    current_user: User = Depends(auth_security.get_current_user), # El usuario a promover
+    db: Session = Depends(get_db)
+):
+    """
+    Endpoint de desarrollo para promover al usuario autenticado
+    a superusuario. Requiere una clave secreta del servidor.
+    """
+
+    if promo_data.secret_key != settings.ADMIN_PROMOTION_KEY:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Clave secreta de promoción incorrecta."
+        )
+    current_user.is_superuser = True
+    updated_user = user_repository.update_user(db, current_user)
+    
+    return updated_user
