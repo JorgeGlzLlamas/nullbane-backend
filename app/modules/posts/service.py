@@ -9,8 +9,8 @@ from app.modules.users.model import User
 from . import repository as post_repository
 from .model import Post
 
-POST_IMAGE_DIR = "/data/posts" 
-POST_IMAGE_URL_DIR = "/static/posts"
+POST_IMAGE_DIR = "/data/avatars" 
+POST_IMAGE_URL_DIR = "/static/avatars"
 
 os.makedirs(POST_IMAGE_DIR, exist_ok=True)
 
