@@ -1,12 +1,14 @@
 from sqlmodel import Field, Relationship, SQLModel
 from app.db.base import BaseModel
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, List
 from datetime import datetime
 from sqlalchemy import Column, DateTime, func
 
 # Para evitar importación circular
 if TYPE_CHECKING:
     from app.modules.settings.model import Settings
+    from app.modules.posts.model import Post
+    from app.modules.comments.model import Comment
 
 class User(BaseModel, table=True):
     __tablename__ = "user"
@@ -24,3 +26,6 @@ class User(BaseModel, table=True):
     is_superuser: bool = Field(default=False)
     
     settings: Optional["Settings"] = Relationship(back_populates="user")
+
+    posts: List["Post"] = Relationship(back_populates="author")
+    comments: List["Comment"] = Relationship(back_populates="author")
