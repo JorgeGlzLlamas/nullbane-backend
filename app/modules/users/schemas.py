@@ -87,3 +87,22 @@ class AuthorRead(SQLModel):
         if self.last_name:
             return f"{self.first_name} {self.last_name}"
         return self.first_name
+
+class UserSearchRead(SQLModel):
+    """
+    Schema para los resultados de búsqueda en 'Agregar Amigos'.
+    El backend ya ha filtrado a los amigos y pendientes.
+    """
+    id: int
+    username: str
+    avatar_url: str | None
+    first_name: str
+    last_name: str | None
+
+    @computed_field
+    @property
+    def full_name(self) -> str:
+        """Concatena el nombre y el apellido."""
+        if self.last_name:
+            return f"{self.first_name} {self.last_name}"
+        return self.first_name
