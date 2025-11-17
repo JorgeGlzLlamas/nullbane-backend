@@ -2,6 +2,7 @@ from sqlmodel import Session, select
 from app.modules.users.model import User
 from app.modules.users.schemas import UserCreate
 from app.modules.settings.model import Settings
+from sqlalchemy import or_, and_
 
 
 def get_user_by_email(db: Session, email: str) -> User | None:
@@ -57,3 +58,46 @@ def update_user(db: Session, user_to_update: User) -> User:
     db.commit()
     db.refresh(user_to_update)
     return user_to_update
+
+
+def search_users_by_name_prefix(
+    db: Session, 
+    search_query: str,
+    limit: int = 20
+) -> list[User]:
+    """
+    Busca usuarios por nombre y/o apellido (prefijo, case-insensitive).
+    """
+    
+    terms = search_query.strip().split()
+    if not terms:
+        return []
+
+    filter_conditions = []
+    
+    if len(terms) == 1:
+        # Búsqueda de un solo término (ej. "jorg")
+        search_term = f"{terms[0]}%" # -> 'jorg%'
+        filter_conditions.append(
+            or_(
+                User.first_name.ilike(search_term),
+                User.last_name.ilike(search_term)
+            )
+        )
+    else:
+        # Búsqueda de dos o más términos (ej. "jorge ll")
+        first_name_term = f"{terms[0]}%"
+        last_name_term = f"{terms[1]}%"
+        filter_conditions.append(
+            and_(
+                User.first_name.ilike(first_name_term),
+                User.last_name.ilike(last_name_term)
+            )
+        )
+
+    statement = (
+        select(User)
+        .where(*filter_conditions)
+        .limit(limit)
+    )
+    return db.exec(statement).all()
