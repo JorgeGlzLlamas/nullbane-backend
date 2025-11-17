@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from app.modules.comments.model import Comment
     from app.modules.friendships.model import Friendship
     from app.modules.chat.model import Message
+    from app.modules.achievements.model import UserAchievement
 
 class User(BaseModel, table=True):
     __tablename__ = "user"
@@ -44,3 +45,4 @@ class User(BaseModel, table=True):
     )
 
     sent_messages: List["Message"] = Relationship(back_populates="sender")
+    achievements_link: List["UserAchievement"] = Relationship(back_populates="user")
