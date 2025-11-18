@@ -62,13 +62,15 @@ def update_user(db: Session, user_to_update: User) -> User:
 
 def search_users_by_name_prefix(
     db: Session, 
-    search_query: str,
-    limit: int = 20
+    search_query: str | None,
+    limit: int = 30
 ) -> list[User]:
     """
     Busca usuarios por nombre y/o apellido (prefijo, case-insensitive).
     """
-    
+    if not search_query:
+        return []
+
     terms = search_query.strip().split()
     if not terms:
         return []
@@ -98,6 +100,15 @@ def search_users_by_name_prefix(
     statement = (
         select(User)
         .where(*filter_conditions)
+        .limit(limit)
+    )
+    return db.exec(statement).all()
+
+def get_recent_users(db: Session, limit: int = 20) -> list[User]:
+    """Obtiene los últimos usuarios registrados."""
+    statement = (
+        select(User)
+        .order_by(User.id.desc())
         .limit(limit)
     )
     return db.exec(statement).all()

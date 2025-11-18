@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status, Response, Query
 from sqlmodel import Session, SQLModel
-from typing import List
+from typing import List, Optional
 
 from app.db.session import get_db
 from app.auth_security import get_current_user
@@ -21,7 +21,7 @@ class FriendRequestCreate(SQLModel):
     summary="Buscar usuarios para agregar (Pantalla 3)"
 )
 def search_users_to_add(
-    name: str = Query(..., min_length=1, description="Nombre a buscar (ej. 'jorge' o 'jorge ll')"),
+    name: Optional[str] = Query(None, description="Nombre a buscar. Si se omite, muestra recientes."),
     current_user: User = Depends(get_current_user),
     service: FriendshipService = Depends()
 ):

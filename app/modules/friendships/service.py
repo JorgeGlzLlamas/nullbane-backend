@@ -17,18 +17,21 @@ class FriendshipService:
     def search_potential_friends(
         self, 
         current_user: User, 
-        name_query: str
+        name_query: str | None
     ) -> list[UserSearchRead]:
         """
         Servicio para la barra de búsqueda de 'Agregar Amigos'.
         Filtra usuarios que no sean amigos, pendientes, o el propio usuario.
         """
         # 1. Llama al repositorio de usuarios para la búsqueda ILIKE
-        found_users = user_repository.search_users_by_name_prefix(
-            self.db, 
-            search_query=name_query
-        )
-        
+        if name_query:
+            found_users = user_repository.search_users_by_name_prefix(
+                self.db, 
+                search_query=name_query
+            )
+        else:
+            found_users = user_repository.get_recent_users(self.db, limit=50)
+
         # 2. Carga un mapa de todas tus relaciones actuales
         current_relations_map = friendship_repository.get_all_relations_map(
             self.db, user_id=current_user.id

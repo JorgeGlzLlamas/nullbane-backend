@@ -36,7 +36,6 @@ def add_achievement_to_user(db: Session, user_id: int, achievement_id: int) -> U
     db.refresh(link)
     return link
 
-
 def get_achievement_by_name(db: Session, name: str) -> Achievement | None:
     """Busca un logro por su nombre único."""
     statement = select(Achievement).where(Achievement.name == name)
