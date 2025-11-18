@@ -125,3 +125,7 @@ class PostService:
             
         # 4. Guardar cambios
         return post_repository.save_post(self.db, post)
+
+    def get_feed(self, limit: int, offset: int) -> list[Post]:
+        """Obtiene el feed de publicaciones."""
+        return post_repository.get_all_posts(self.db, limit=limit, offset=offset)

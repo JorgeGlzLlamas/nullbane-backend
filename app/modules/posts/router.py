@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status, Form, File, UploadFile
 from sqlmodel import Session
-from typing import Optional, Iterator
+from typing import Optional, Iterator, List
 
 from app.db.session import get_db
 from app.auth_security import get_current_user
@@ -8,8 +8,25 @@ from app.modules.users.model import User
 from app.modules.posts.schemas import PostRead, PostReadWithComments
 from app.modules.posts.service import PostService
 from app.modules.comments.router import router as comments_router
+from fastapi import Query
 
 router = APIRouter()
+
+@router.get(
+    "/",
+    response_model=List[PostRead],
+    summary="Obtener feed de publicaciones"
+)
+def get_posts_feed(
+    limit: int = Query(20, ge=1, le=100, description="Cantidad de posts a traer"),
+    offset: int = Query(0, ge=0, description="Desde qué post empezar (paginación)"),
+    service: PostService = Depends()
+):
+    """
+    Devuelve una lista de las publicaciones más recientes.
+    Incluye información del autor, pero no los comentarios.
+    """
+    return service.get_feed(limit=limit, offset=offset)
 
 @router.post(
     "/",

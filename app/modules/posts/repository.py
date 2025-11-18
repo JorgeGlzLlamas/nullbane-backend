@@ -5,6 +5,7 @@ from typing import Optional
 from app.modules.posts.model import Post
 from app.modules.comments.model import Comment
 from app.modules.users.model import User
+from sqlalchemy import desc
 
 
 def create_post(
@@ -56,3 +57,23 @@ def save_post(db: Session, post_to_save: Post) -> Post:
     db.commit()
     db.refresh(post_to_save)
     return post_to_save
+
+def get_all_posts(
+    db: Session, 
+    limit: int = 20, 
+    offset: int = 0
+) -> list[Post]:
+    """
+    Obtiene una lista de posts paginada y ordenada por fecha (más nuevos primero).
+    Carga la relación con el autor (selectinload) para el feed.
+    """
+    statement = (
+        select(Post)
+        .order_by(desc(Post.created_at)) # Orden descendente (nuevos arriba)
+        .options(
+            selectinload(Post.author) # Importante: Cargar datos del autor
+        )
+        .limit(limit)
+        .offset(offset)
+    )
+    return db.exec(statement).all()
