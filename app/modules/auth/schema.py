@@ -28,3 +28,16 @@ class PromoteRequest(SQLModel):
     Schema de entrada para la petición de promoción a admin.
     """
     secret_key: str
+
+class ForgotPasswordRequest(SQLModel):
+    email: str
+
+class ResetPasswordWithCodeRequest(SQLModel):
+    email: str
+    code: str
+    new_password: str
+    confirm_password: str
+
+class VerifyCodeRequest(SQLModel):
+    email: str
+    code: str

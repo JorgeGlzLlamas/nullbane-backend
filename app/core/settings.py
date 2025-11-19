@@ -1,5 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import PostgresDsn, model_validator
+from pydantic import PostgresDsn, model_validator, EmailStr
+
+
 
 class Settings(BaseSettings):
     """
@@ -26,6 +28,14 @@ class Settings(BaseSettings):
 
     # Cofigurar clave para promoción a admin
     ADMIN_PROMOTION_KEY: str
+
+    # Variables de configuración de correo
+    MAIL_USERNAME: str
+    MAIL_PASSWORD: str
+    MAIL_FROM: EmailStr
+    MAIL_PORT: int = 465
+    MAIL_SERVER: str = "smtp.gmail.com"
+    MAIL_FROM_NAME: str = "Soporte Nullbane"
 
     model_config = SettingsConfigDict(
         env_file=".env",

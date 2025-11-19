@@ -11,6 +11,7 @@ from app.modules.comments import model as comment_model
 from app.modules.friendships import model as friendship_model
 from app.modules.chat import model as message_model
 from app.modules.achievements import model as achievement_model
+from app.modules.auth import model as auth_model
 
 app = FastAPI(title="Nullbane Backend")
 
