@@ -6,7 +6,14 @@ from app.db.session import engine
 from alembic import context
 
 from app.core.settings import settings
-from app.modules.users import model
+from app.modules.users.model import User
+from app.modules.settings.model import Settings
+from app.modules.posts.model import Post
+from app.modules.comments.model import Comment
+from app.modules.friendships.model import Friendship
+from app.modules.chat.model import Message
+from app.modules.achievements.model import UserAchievement, Achievement
+from app.modules.auth.model import PasswordReset
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

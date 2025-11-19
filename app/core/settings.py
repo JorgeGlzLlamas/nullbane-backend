@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import PostgresDsn, model_validator
-from typing import Optional
+from pydantic import PostgresDsn, model_validator, EmailStr
+
+
 
 class Settings(BaseSettings):
     """
@@ -17,6 +18,25 @@ class Settings(BaseSettings):
     DB_USER: str | None = None
     DB_PASSWORD: str | None = None
 
+    # Configuración de JWT
+    JWT_SECRET_KEY: str
+    JWT_ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
+
+    JWT_REFRESH_SECRET_KEY: str
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = 10080
+
+    # Cofigurar clave para promoción a admin
+    ADMIN_PROMOTION_KEY: str
+
+    # Variables de configuración de correo
+    RESEND_API_KEY: str
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore"
+    )
 
     @model_validator(mode='after')
     def get_database_url(self) -> 'Settings':
@@ -60,10 +80,6 @@ class Settings(BaseSettings):
         raise ValueError("Configuración de base de datos inválida. "
                          "Define DATABASE_URL (para Railway) o "
                          "DB_HOST, DB_NAME, DB_PORT, DB_USER, DB_PASSWORD (para local).")
-
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
 
 # Se crea una instancia única que se importará en otros archivos
 settings = Settings()

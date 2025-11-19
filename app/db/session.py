@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
+from sqlmodel import Session
 from app.core.settings import settings
+from typing import Iterator
 
 # Crear el engine
 engine = create_engine(
@@ -10,7 +11,7 @@ engine = create_engine(
 
 
 # Dependencia de FastAPI
-def get_db():
+def get_db() -> Iterator[Session]:
     """
     Función 'dependencia' que inyecta una sesión de base de datos
     en los endpoints de la API.
