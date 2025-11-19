@@ -13,4 +13,4 @@ python-jose[cryptography]
 
 pytest
 httpx
-fastapi-mail
+resend

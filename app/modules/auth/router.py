@@ -113,9 +113,8 @@ def promote_me_to_admin(
     return updated_user
 
 @router.post("/forgot-password", status_code=status.HTTP_200_OK)
-async def forgot_password(
-    request: ForgotPasswordRequest,
-    background_tasks: BackgroundTasks, # Para enviar el email sin bloquear
+def forgot_password(
+    request: ForgotPasswordRequest, # Para enviar el email sin bloquear
     db: Session = Depends(get_db)
 ):
     # Validar que el usuario existe
@@ -143,12 +142,7 @@ async def forgot_password(
     db.add(reset_entry)
     db.commit()
 
-    # Enviar Email (en segundo plano para que la respuesta sea rápida)
-    background_tasks.add_task(
-        email_service.send_password_reset_email, 
-        request.email, 
-        otp_code
-    )
+    email_service.send_password_reset_email(request.email, otp_code)
 
     return {"message": "Código enviado correctamente"}
 

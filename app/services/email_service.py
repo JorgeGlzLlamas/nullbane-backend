@@ -1,43 +1,44 @@
-from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
+import resend
 from app.core.settings import settings
 import random
 import string
 
-# Configuración de FastAPI-Mail
-conf = ConnectionConfig(
-    MAIL_USERNAME=settings.MAIL_USERNAME,
-    MAIL_PASSWORD=settings.MAIL_PASSWORD,
-    MAIL_FROM=settings.MAIL_FROM,
-    MAIL_PORT=settings.MAIL_PORT,
-    MAIL_SERVER=settings.MAIL_SERVER,
-    MAIL_STARTTLS=True,
-    MAIL_SSL_TLS=False,
-    USE_CREDENTIALS=True,
-    VALIDATE_CERTS=True,
-    TIMEOUT=30
-)
+# Configurar la API Key
+resend.api_key = settings.RESEND_API_KEY
 
 def generate_otp_code(length: int = 6) -> str:
     """Genera un código numérico de 6 dígitos."""
     return ''.join(random.choices(string.digits, k=length))
 
-async def send_password_reset_email(email_to: str, code: str):
-    """Envía el correo con el código."""
+def send_password_reset_email(email_to: str, code: str):
+    """
+    Envía el correo usando la API de Resend.
+    NOTA: Es una llamada síncrona rápida, no bloqueará mucho tu API.
+    """
     
-    html = f"""
-    <h3>Recuperación de Contraseña</h3>
-    <p>Usa el siguiente código para restablecer tu contraseña:</p>
-    <h1 style="color: #4A90E2; letter-spacing: 5px;">{code}</h1>
-    <p>Este código expira en 15 minutos.</p>
-    <p>Si no solicitaste esto, ignora este correo.</p>
+    html_content = f"""
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Recuperación de Contraseña</h2>
+        <p>Usa el siguiente código para restablecer tu contraseña en Nullbane:</p>
+        <div style="background-color: #f4f4f4; padding: 20px; text-align: center; border-radius: 5px;">
+            <h1 style="color: #000; letter-spacing: 5px; margin: 0;">{code}</h1>
+        </div>
+        <p style="color: #666; font-size: 12px; margin-top: 20px;">Este código expira en 15 minutos.</p>
+    </div>
     """
 
-    message = MessageSchema(
-        subject="Tu código de recuperación - Nullbane",
-        recipients=[email_to],
-        body=html,
-        subtype=MessageType.html
-    )
+    try:
+        params = {
+            "from": "Nullbane <onboarding@resend.dev>", # Usa este remitente por defecto
+            "to": [email_to],
+            "subject": "Código de Recuperación",
+            "html": html_content
+        }
 
-    fm = FastMail(conf)
-    await fm.send_message(message)
+        email = resend.Emails.send(params)
+        print(f"✅ Correo enviado ID: {email.id}")
+        return email
+
+    except Exception as e:
+        print(f"❌ Error enviando correo Resend: {e}")
+        # No lanzamos error para no romper el flujo del usuario, pero lo logueamos

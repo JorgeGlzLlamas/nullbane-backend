@@ -30,12 +30,7 @@ class Settings(BaseSettings):
     ADMIN_PROMOTION_KEY: str
 
     # Variables de configuración de correo
-    MAIL_USERNAME: str
-    MAIL_PASSWORD: str
-    MAIL_FROM: EmailStr
-    MAIL_PORT: int = 465
-    MAIL_SERVER: str = "smtp.gmail.com"
-    MAIL_FROM_NAME: str = "Soporte Nullbane"
+    RESEND_API_KEY: str
 
     model_config = SettingsConfigDict(
         env_file=".env",
